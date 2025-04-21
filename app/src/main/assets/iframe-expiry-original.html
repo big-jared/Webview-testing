@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expiry Field</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        form {
+          height: 100%;
+        }
+        input {
+          width: 100%;
+          height: 100%;
+          border: none;
+          padding: 0 8px;
+          font-size: 16px;
+          box-sizing: border-box;
+          outline: none;
+        }
+        /* CSS for autofill detection */
+        @keyframes AutofillStart {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        @keyframes AutofillCancel {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        input:-webkit-autofill {
+          animation-name: AutofillStart;
+          animation-duration: 1ms;
+        }
+        input:not(:-webkit-autofill) {
+          animation-name: AutofillCancel;
+          animation-duration: 1ms;
+        }
+    </style>
+</head>
+<body>
+<form id="expiry-form">
+    <input
+            type="text"
+            id="expiry-field"
+            name="expiry"
+            placeholder="MM / YY"
+            autocomplete="cc-exp"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            data-field-type="expiry-original">
+</form>
+
+<script>
+    // Log information about the environment
+    console.log('Expiry Field iframe loaded (Original Pattern)');
+    console.log('User Agent:', navigator.userAgent);
+
+    const expiryField = document.getElementById('expiry-field');
+
+    // Function to format expiry date (MM/YY)
+    function formatExpiryDate(value) {
+      // Remove non-digits
+      value = value.replace(/\D/g, '');
+
+      // Insert slash after first 2 digits
+      if (value.length > 2) {
+        value = value.substring(0, 2) + ' / ' + value.substring(2);
+      }
+
+      return value;
+    }
+
+    // Handle input events
+    expiryField.addEventListener('input', function(event) {
+      const originalValue = this.value;
+      const formattedValue = formatExpiryDate(originalValue);
+
+      if (originalValue !== formattedValue) {
+        this.value = formattedValue;
+      }
+
+      // Send value to parent window
+      sendValueToParent();
+    });
+
+    // Listen for autofill events
+    expiryField.addEventListener('animationstart', function(event) {
+      if (event.animationName === 'AutofillStart') {
+        console.log('Autofill detected in expiry field (Original Pattern)');
+        console.log('Raw value:', this.value);
+
+        // Send data to parent after a short delay to ensure value is set
+        setTimeout(sendValueToParent, 100);
+      }
+    });
+
+    // Function to send field value to parent window
+    function sendValueToParent() {
+      window.parent.postMessage({
+        type: 'field-value',
+        field: 'expiry-original',
+        value: expiryField.value,
+        rawPattern: '[0-9]*'
+      }, '*');
+    }
+</script>
+</body>
+</html>

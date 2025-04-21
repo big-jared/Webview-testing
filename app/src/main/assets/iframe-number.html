@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Number Field</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        form {
+          height: 100%;
+        }
+        input {
+          width: 100%;
+          height: 100%;
+          border: none;
+          padding: 0 8px;
+          font-size: 16px;
+          box-sizing: border-box;
+          outline: none;
+        }
+        /* CSS for autofill detection */
+        @keyframes AutofillStart {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        @keyframes AutofillCancel {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        input:-webkit-autofill {
+          animation-name: AutofillStart;
+          animation-duration: 1ms;
+        }
+        input:not(:-webkit-autofill) {
+          animation-name: AutofillCancel;
+          animation-duration: 1ms;
+        }
+    </style>
+</head>
+<body>
+<form id="number-form">
+    <input
+            type="text"
+            id="card-number"
+            name="number"
+            placeholder="Card number"
+            autocomplete="cc-number"
+            inputmode="numeric"
+            pattern="[0-9\s]*">
+</form>
+
+<script>
+    // Log information about the environment
+    console.log('Card Number iframe loaded');
+    console.log('User Agent:', navigator.userAgent);
+
+    const cardNumberField = document.getElementById('card-number');
+
+    // Function to format card number (groups of 4)
+    function formatCardNumber(value) {
+      // Remove non-digits
+      value = value.replace(/\D/g, '');
+
+      // Add space after every 4 digits
+      return value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    }
+
+    // Handle input events
+    cardNumberField.addEventListener('input', function(event) {
+      const originalValue = this.value;
+      const formattedValue = formatCardNumber(originalValue);
+
+      if (originalValue !== formattedValue) {
+        this.value = formattedValue;
+      }
+
+      // Send value to parent window
+      sendValueToParent();
+    });
+
+    // Listen for autofill events
+    cardNumberField.addEventListener('animationstart', function(event) {
+      if (event.animationName === 'AutofillStart') {
+        console.log('Autofill detected in card number field');
+        console.log('Raw value:', this.value);
+
+        // Send data to parent after a short delay to ensure value is set
+        setTimeout(sendValueToParent, 100);
+      }
+    });
+
+    // Function to send field value to parent window
+    function sendValueToParent() {
+      window.parent.postMessage({
+        type: 'field-value',
+        field: 'number',
+        value: cardNumberField.value
+      }, '*');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVC Field</title>
+    <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        form {
+          height: 100%;
+        }
+        input {
+          width: 100%;
+          height: 100%;
+          border: none;
+          padding: 0 8px;
+          font-size: 16px;
+          box-sizing: border-box;
+          outline: none;
+        }
+        /* CSS for autofill detection */
+        @keyframes AutofillStart {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        @keyframes AutofillCancel {
+          from { content: ""; }
+          to { content: ""; }
+        }
+        input:-webkit-autofill {
+          animation-name: AutofillStart;
+          animation-duration: 1ms;
+        }
+        input:not(:-webkit-autofill) {
+          animation-name: AutofillCancel;
+          animation-duration: 1ms;
+        }
+    </style>
+</head>
+<body>
+<form id="cvc-form">
+    <input
+            type="text"
+            id="card-cvc"
+            name="cvc"
+            placeholder="CVC"
+            autocomplete="cc-csc"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="4">
+</form>
+
+<script>
+    // Log information about the environment
+    console.log('CVC Field iframe loaded');
+    console.log('User Agent:', navigator.userAgent);
+
+    const cvcField = document.getElementById('card-cvc');
+
+    // Handle input events
+    cvcField.addEventListener('input', function(event) {
+      // Allow only digits
+      this.value = this.value.replace(/\D/g, '');
+
+      // Send value to parent window
+      sendValueToParent();
+    });
+
+    // Listen for autofill events
+    cvcField.addEventListener('animationstart', function(event) {
+      if (event.animationName === 'AutofillStart') {
+        console.log('Autofill detected in CVC field');
+        console.log('Raw value:', this.value);
+
+        // Send data to parent after a short delay to ensure value is set
+        setTimeout(sendValueToParent, 100);
+      }
+    });
+
+    // Function to send field value to parent window
+    function sendValueToParent() {
+      window.parent.postMessage({
+        type: 'field-value',
+        field: 'cvc',
+        value: cvcField.value
+      }, '*');
+    }
+</script>
+</body>
+</html>
