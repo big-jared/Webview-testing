@@ -4,44 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expiry Field (Current Pattern)</title>
-    <style>
-        html, body {
-          margin: 0;
-          padding: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-        }
-        form {
-          height: 100%;
-        }
-        input {
-          width: 100%;
-          height: 100%;
-          border: none;
-          padding: 0 8px;
-          font-size: 16px;
-          box-sizing: border-box;
-          outline: none;
-        }
-        /* CSS for autofill detection */
-        @keyframes AutofillStart {
-          from { content: ""; }
-          to { content: ""; }
-        }
-        @keyframes AutofillCancel {
-          from { content: ""; }
-          to { content: ""; }
-        }
-        input:-webkit-autofill {
-          animation-name: AutofillStart;
-          animation-duration: 1ms;
-        }
-        input:not(:-webkit-autofill) {
-          animation-name: AutofillCancel;
-          animation-duration: 1ms;
-        }
-    </style>
 </head>
 <body>
 <form id="expiry-form">
@@ -52,7 +14,7 @@
             autocomplete="cc-exp"
             placeholder="Expiry date (MM / YY)"
             inputmode="numeric"
-            pattern="[0-9\\sssss\\/]*"
+            pattern="[0-9\\s\\/]*"
             data-field-type="expiry-current">
 </form>
 </body>
